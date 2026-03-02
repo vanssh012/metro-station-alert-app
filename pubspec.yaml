@@ -1,0 +1,55 @@
+name: metrowake
+description: Smart Metro Station Alert System - Never miss your station again.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.10.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.6
+  
+  # State Management
+  provider: ^6.1.1
+  
+  # Location & Maps
+  geolocator: ^11.0.0
+  permission_handler: ^11.1.0
+  flutter_map: ^6.1.0
+  latlong2: ^0.9.0
+  
+  # Notifications & Alerts
+  flutter_local_notifications: ^17.0.0
+  vibration: ^2.0.0
+  audioplayers: ^6.0.0
+  
+  # Storage
+  sqflite: ^2.3.0
+  path_provider: ^2.1.1
+  shared_preferences: ^2.2.2
+  
+  # UI
+  google_fonts: ^6.1.0
+  shimmer: ^3.0.0
+  animate_do: ^3.1.2
+  
+  # Utils
+  equatable: ^2.0.5
+  uuid: ^4.2.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.1
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/data/
+    - assets/sounds/
+    - assets/images/
+

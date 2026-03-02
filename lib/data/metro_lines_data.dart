@@ -1,0 +1,68 @@
+import '../models/metro_line.dart';
+import '../utils/constants.dart';
+
+final List<MetroLine> allMetroLines = [
+  const MetroLine(
+    id: LineIds.blue,
+    name: 'Blue Line',
+    colorHex: LineColors.blue,
+    network: MetroNetworks.dmrc,
+    stationIds: ['bl_01','bl_02','bl_03','bl_04','bl_05','bl_06','bl_07','bl_08','bl_09','bl_10','bl_11','bl_12','bl_13','bl_14','bl_15','bl_16','bl_17','bl_18','bl_19','bl_20','bl_21','bl_22','bl_23','bl_24','bl_25','bl_26','bl_27','bl_28','bl_29','bl_30','bl_31','bl_32','bl_33','bl_34','bl_35','bl_36','bl_37','bl_38','bl_39','bl_40','bl_41','bl_42','bl_43','bl_44','bl_45','bl_46','bl_47','bl_48','bl_49'],
+    terminal1: 'Dwarka Sector 21',
+    terminal2: 'Noida Electronic City',
+  ),
+  const MetroLine(
+    id: LineIds.yellow,
+    name: 'Yellow Line',
+    colorHex: LineColors.yellow,
+    network: MetroNetworks.dmrc,
+    stationIds: ['yl_01','yl_02','yl_03','yl_04','yl_05','yl_06','yl_07','yl_08','yl_09','yl_10','yl_11','yl_12','yl_13','yl_14','yl_15','yl_16','yl_17','yl_18','yl_19','yl_20','yl_21','yl_22','yl_23','yl_24','yl_25','yl_26','yl_27','yl_28','yl_29','yl_30','yl_31','yl_32','yl_33','yl_34','yl_35','yl_36','yl_37'],
+    terminal1: 'Samaypur Badli',
+    terminal2: 'HUDA City Centre',
+  ),
+  const MetroLine(
+    id: LineIds.red,
+    name: 'Red Line',
+    colorHex: LineColors.red,
+    network: MetroNetworks.dmrc,
+    stationIds: ['rl_01','rl_02','rl_03','rl_04','rl_05','rl_06','rl_07','rl_08','rl_09','rl_10','rl_11','rl_12','rl_13','rl_14','rl_15','rl_16','rl_17','rl_18','rl_19','rl_20','rl_21','rl_22','rl_23','rl_24'],
+    terminal1: 'Rithala',
+    terminal2: 'Shaheed Sthal',
+  ),
+  const MetroLine(
+    id: LineIds.violet,
+    name: 'Violet Line',
+    colorHex: LineColors.violet,
+    network: MetroNetworks.dmrc,
+    stationIds: ['vl_01','vl_02','vl_03','vl_04','vl_05','vl_06','vl_07','vl_08','vl_09','vl_10','vl_11','vl_12','vl_13','vl_14','vl_15','vl_16','vl_17','vl_18','vl_19','vl_20','vl_21','vl_22','vl_23','vl_24','vl_25','vl_26','vl_27','vl_28','vl_29','vl_30','vl_31','vl_32','vl_33'],
+    terminal1: 'Kashmere Gate',
+    terminal2: 'Raja Nahar Singh',
+  ),
+  const MetroLine(
+    id: LineIds.green,
+    name: 'Green Line',
+    colorHex: LineColors.green,
+    network: MetroNetworks.dmrc,
+    stationIds: ['gl_01','gl_02','gl_03','gl_04','gl_05','gl_06','gl_07','gl_08'],
+    terminal1: 'Brigadier Hoshiar Singh',
+    terminal2: 'Inder Lok',
+  ),
+  const MetroLine(
+    id: LineIds.magenta,
+    name: 'Magenta Line',
+    colorHex: LineColors.magenta,
+    network: MetroNetworks.dmrc,
+    stationIds: ['mg_01','mg_02','mg_03','mg_04','mg_05','mg_06','mg_07','mg_08','mg_09','mg_10','mg_11','mg_12','mg_13'],
+    terminal1: 'Botanical Garden',
+    terminal2: 'Janakpuri West',
+  ),
+  const MetroLine(
+    id: LineIds.rrtsMeerut,
+    name: 'Namo Bharat RRTS',
+    colorHex: LineColors.rrtsMeerut,
+    network: MetroNetworks.ncrtc,
+    stationIds: ['rr_01','rr_02','rr_03','rr_04','rr_05','rr_06','rr_07','rr_08','rr_09','rr_10','rr_11','rr_12','rr_13','rr_14'],
+    terminal1: 'Sarai Kale Khan',
+    terminal2: 'Meerut North',
+  ),
+];
