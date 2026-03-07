@@ -5,6 +5,7 @@ import '../services/journey_provider.dart';
 import '../data/metro_data_provider.dart';
 import 'station_selection_screen.dart';
 import 'route_preview_screen.dart';
+import 'metro_map_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -83,6 +84,8 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               _buildHeader(),
               const SizedBox(height: 28),
               _buildJourneyCard(context),
+              const SizedBox(height: 24),
+              _buildMapButton(context),
               const SizedBox(height: 24),
               _buildQuickActions(context),
               const SizedBox(height: 24),
@@ -309,6 +312,58 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               color: AppTheme.textMuted,
               size: 20,
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMapButton(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const MetroMapScreen()),
+      ),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [AppTheme.accent.withOpacity(0.15), AppTheme.pinkLineColor.withOpacity(0.08)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppTheme.accent.withOpacity(0.25)),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppTheme.accent.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: const Icon(Icons.map_rounded, color: AppTheme.accent, size: 24),
+            ),
+            const SizedBox(width: 14),
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Metro Network Map',
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppTheme.textPrimary),
+                  ),
+                  SizedBox(height: 2),
+                  Text(
+                    'View all lines • Tap any station',
+                    style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_ios_rounded, color: AppTheme.textMuted, size: 16),
           ],
         ),
       ),

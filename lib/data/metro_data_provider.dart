@@ -3,6 +3,8 @@ import '../models/metro_line.dart';
 import 'stations_blue.dart';
 import 'stations_yellow.dart';
 import 'stations_other.dart';
+import 'stations_pink.dart';
+import 'stations_extended.dart';
 import 'metro_lines_data.dart';
 
 /// Provides access to all metro station and line data.
@@ -21,6 +23,12 @@ class MetroDataProvider {
       ...blueLineStations,
       ...yellowLineStations,
       ...otherLineStations,
+      ...pinkLineStations,
+      ...blueBranchStations,
+      ...orangeLineStations,
+      ...greyLineStations,
+      ...aquaLineStations,
+      ...rapidMetroStations,
     ];
     _lines = allMetroLines;
     _initialized = true;

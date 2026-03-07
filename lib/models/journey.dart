@@ -52,6 +52,7 @@ class Journey {
   final List<Station> allStations; // Flat list of all stations in order
   final int totalStations;
   final bool isDirect;
+  final int totalTimeMinutes; // Computed from per-line avg times + interchange time
 
   const Journey({
     required this.startStation,
@@ -61,10 +62,11 @@ class Journey {
     required this.allStations,
     required this.totalStations,
     required this.isDirect,
+    this.totalTimeMinutes = 0,
   });
 
-  /// Estimated journey time in minutes (approx 2.5 min per station)
-  int get estimatedTimeMinutes => (totalStations * 2.5).round();
+  /// Estimated journey time in minutes
+  int get estimatedTimeMinutes => totalTimeMinutes > 0 ? totalTimeMinutes : (totalStations * 2.5).round();
 }
 
 /// Status of an active journey.

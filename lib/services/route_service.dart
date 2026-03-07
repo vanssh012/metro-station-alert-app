@@ -4,9 +4,13 @@ import '../models/metro_line.dart';
 import '../data/metro_data_provider.dart';
 
 /// Service for finding routes between metro stations.
-/// Supports direct (same-line) and single-interchange routes.
+/// Supports direct (same-line) and single/multi-interchange routes.
+/// Computes travel time using per-line official average times.
 class RouteService {
   final MetroDataProvider _dataProvider;
+
+  /// Interchange time in minutes (walking between platforms)
+  static const double interchangeTimeMinutes = 5.0;
 
   RouteService(this._dataProvider);
 
@@ -19,6 +23,14 @@ class RouteService {
 
     // Case 2: Single interchange route
     return _buildInterchangeRoute(start, end);
+  }
+
+  /// Calculate travel time for a list of stations on a given line.
+  double _calculateLegTime(List<Station> stations, String lineId) {
+    final line = _dataProvider.getLineById(lineId);
+    final avgTime = line?.avgMinutesPerStation ?? 2.5;
+    // Time = (number of station gaps) × avg time
+    return (stations.length - 1) * avgTime;
   }
 
   /// Build a direct route on the same line.
@@ -43,6 +55,8 @@ class RouteService {
       direction = line.terminal1;
     }
 
+    final travelTime = _calculateLegTime(routeStations, start.lineId);
+
     final leg = JourneyLeg(
       lineId: start.lineId,
       lineName: start.lineName,
@@ -59,6 +73,7 @@ class RouteService {
       allStations: routeStations,
       totalStations: routeStations.length,
       isDirect: true,
+      totalTimeMinutes: travelTime.round(),
     );
   }
 
@@ -80,9 +95,9 @@ class RouteService {
       return _buildMultiInterchangeRoute(start, end);
     }
 
-    // Pick the interchange that minimizes total stations
+    // Pick the interchange that minimizes total time
     Journey? bestJourney;
-    int bestCount = 999;
+    double bestTime = 99999;
 
     for (final interchange in interchangeStations) {
       // Build leg 1: start → interchange on start line
@@ -100,9 +115,12 @@ class RouteService {
       final leg2Stations = _getStationsBetween(interchangeOnEndLine, end, end.lineId);
       if (leg2Stations == null) continue;
 
-      final totalCount = leg1Stations.length + leg2Stations.length;
-      if (totalCount < bestCount) {
-        bestCount = totalCount;
+      final leg1Time = _calculateLegTime(leg1Stations, start.lineId);
+      final leg2Time = _calculateLegTime(leg2Stations, end.lineId);
+      final totalTime = leg1Time + interchangeTimeMinutes + leg2Time;
+
+      if (totalTime < bestTime) {
+        bestTime = totalTime;
 
         final direction1 = _getDirection(start, interchange, startLine);
         final direction2 = _getDirection(interchangeOnEndLine, end, endLine);
@@ -134,6 +152,7 @@ class RouteService {
           allStations: allStations,
           totalStations: allStations.length,
           isDirect: false,
+          totalTimeMinutes: totalTime.round(),
         );
       }
     }
@@ -144,6 +163,9 @@ class RouteService {
   /// Attempt to find a route with 2 interchanges for lines not directly connected.
   Journey? _buildMultiInterchangeRoute(Station start, Station end) {
     final allLines = _dataProvider.lines;
+
+    Journey? bestJourney;
+    double bestTime = 99999;
 
     // Try every intermediate line
     for (final midLine in allLines) {
@@ -163,56 +185,66 @@ class RouteService {
           .toList();
       if (interchange2Candidates.isEmpty) continue;
 
-      // Found a valid 2-interchange route, use first candidates
-      final i1 = interchange1Candidates.first;
-      final i2 = interchange2Candidates.first;
+      // Try all combinations for best time
+      for (final i1 in interchange1Candidates) {
+        for (final i2 in interchange2Candidates) {
+          final leg1 = _getStationsBetween(start, i1, start.lineId);
+          if (leg1 == null) continue;
 
-      final leg1 = _getStationsBetween(start, i1, start.lineId);
-      if (leg1 == null) continue;
+          final i1OnMid = midLineStations.firstWhere(
+            (s) => s.name == i1.name, orElse: () => i1);
+          final i2OnMid = midLineStations.firstWhere(
+            (s) => s.name == i2.name, orElse: () => i2);
 
-      // Find i1 and i2 on mid line
-      final i1OnMid = midLineStations.firstWhere(
-        (s) => s.name == i1.name, orElse: () => i1);
-      final i2OnMid = midLineStations.firstWhere(
-        (s) => s.name == i2.name, orElse: () => i2);
-      
-      final leg2 = _getStationsBetween(i1OnMid, i2OnMid, midLine.id);
-      if (leg2 == null) continue;
+          final leg2 = _getStationsBetween(i1OnMid, i2OnMid, midLine.id);
+          if (leg2 == null) continue;
 
-      final endLineStations = _dataProvider.getStationsForLine(end.lineId);
-      final i2OnEnd = endLineStations.firstWhere(
-        (s) => s.name == i2.name, orElse: () => i2);
-      
-      final leg3 = _getStationsBetween(i2OnEnd, end, end.lineId);
-      if (leg3 == null) continue;
+          final endLineStations = _dataProvider.getStationsForLine(end.lineId);
+          final i2OnEnd = endLineStations.firstWhere(
+            (s) => s.name == i2.name, orElse: () => i2);
 
-      final startLine = _dataProvider.getLineById(start.lineId)!;
-      final endLine = _dataProvider.getLineById(end.lineId)!;
+          final leg3 = _getStationsBetween(i2OnEnd, end, end.lineId);
+          if (leg3 == null) continue;
 
-      final dir1 = _getDirection(start, i1, startLine);
-      final dir2 = _getDirection(i1OnMid, i2OnMid, midLine);
-      final dir3 = _getDirection(i2OnEnd, end, endLine);
+          final time1 = _calculateLegTime(leg1, start.lineId);
+          final time2 = _calculateLegTime(leg2, midLine.id);
+          final time3 = _calculateLegTime(leg3, end.lineId);
+          final totalTime = time1 + interchangeTimeMinutes + time2 + interchangeTimeMinutes + time3;
 
-      final allStations = [...leg1, ...leg2.skip(1), ...leg3.skip(1)];
+          if (totalTime < bestTime) {
+            bestTime = totalTime;
 
-      return Journey(
-        startStation: start, endStation: end,
-        legs: [
-          JourneyLeg(lineId: start.lineId, lineName: start.lineName, lineColor: start.lineColor, stations: leg1, direction: dir1),
-          JourneyLeg(lineId: midLine.id, lineName: midLine.name, lineColor: midLine.colorHex, stations: leg2, direction: dir2),
-          JourneyLeg(lineId: end.lineId, lineName: end.lineName, lineColor: end.lineColor, stations: leg3, direction: dir3),
-        ],
-        interchanges: [
-          Interchange(station: i1, fromLine: start.lineName, fromLineColor: start.lineColor, toLine: midLine.name, toLineColor: midLine.colorHex, direction: dir2),
-          Interchange(station: i2, fromLine: midLine.name, fromLineColor: midLine.colorHex, toLine: end.lineName, toLineColor: end.lineColor, direction: dir3),
-        ],
-        allStations: allStations,
-        totalStations: allStations.length,
-        isDirect: false,
-      );
+            final startLine = _dataProvider.getLineById(start.lineId)!;
+            final endLine = _dataProvider.getLineById(end.lineId)!;
+
+            final dir1 = _getDirection(start, i1, startLine);
+            final dir2 = _getDirection(i1OnMid, i2OnMid, midLine);
+            final dir3 = _getDirection(i2OnEnd, end, endLine);
+
+            final allStations = [...leg1, ...leg2.skip(1), ...leg3.skip(1)];
+
+            bestJourney = Journey(
+              startStation: start, endStation: end,
+              legs: [
+                JourneyLeg(lineId: start.lineId, lineName: start.lineName, lineColor: start.lineColor, stations: leg1, direction: dir1),
+                JourneyLeg(lineId: midLine.id, lineName: midLine.name, lineColor: midLine.colorHex, stations: leg2, direction: dir2),
+                JourneyLeg(lineId: end.lineId, lineName: end.lineName, lineColor: end.lineColor, stations: leg3, direction: dir3),
+              ],
+              interchanges: [
+                Interchange(station: i1, fromLine: start.lineName, fromLineColor: start.lineColor, toLine: midLine.name, toLineColor: midLine.colorHex, direction: dir2),
+                Interchange(station: i2, fromLine: midLine.name, fromLineColor: midLine.colorHex, toLine: end.lineName, toLineColor: end.lineColor, direction: dir3),
+              ],
+              allStations: allStations,
+              totalStations: allStations.length,
+              isDirect: false,
+              totalTimeMinutes: totalTime.round(),
+            );
+          }
+        }
+      }
     }
 
-    return null; // Could not find route
+    return bestJourney;
   }
 
   /// Get stations between two stations on the same line.
